@@ -1,0 +1,11 @@
+#!/bin/bash
+
+# list available bundle in bundles-available
+VIM_DIR=$HOME/.vim/
+
+# optional pattern to grep for
+SEARCH_PATTERN="$1"
+
+echo "available bundles:"
+ls -1 ${VIM_DIR}/bundles-available | grep "$SEARCH_PATTERN" | less
+

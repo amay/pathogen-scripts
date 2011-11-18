@@ -1,0 +1,24 @@
+#!/bin/bash
+
+# "enable" bundle by linking to bundles-available
+VIM_DIR=$HOME/.vim/
+
+BUNDLE=$1
+if [ -z $BUNDLE ] ; then
+  echo "must specify bundle to enable"
+  exit 1
+fi
+
+if [ ! -d ${VIM_DIR}/bundles-available/$BUNDLE ] ; then
+  echo "unknown bundle: $BUNDLE"
+  exit 1
+fi
+
+if [ -h ${VIM_DIR}/bundle/$BUNDLE ] ; then
+  echo "$BUNDLE already enabled"
+  exit 0
+fi
+
+ln -s ${VIM_DIR}/bundles-available/$BUNDLE ${VIM_DIR}/bundle/$BUNDLE
+echo "$BUNDLE enabled"
+

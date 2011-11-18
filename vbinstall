@@ -1,0 +1,56 @@
+#!/usr/bin/env ruby
+
+require 'fileutils'
+
+# helper script to create a vim bundle in ~/.vim/bundle
+
+unless ARGV.size >= 2
+  puts "must provide:
+    NAME
+    VIM_RESOURCE (.vim,.zip,.git URL,wget URL)
+    [PATH (location to install .vim - only needed for .vim)]
+  "
+  exit 1
+end
+
+bundle_name = ARGV[0]
+vim_resource = ARGV[1]
+install_path = ARGV[2] || 'plugin'
+
+BUNDLE_DIR = "#{ENV['HOME']}/.vim/bundles-available/#{bundle_name}"
+
+# if resource is a git repo, just checkout and be done
+if vim_resource =~ /^http(s)?:.*\.git$/
+  `git clone #{vim_resource} #{BUNDLE_DIR}`
+  exit 0
+end
+
+# download resource if type is URL
+if vim_resource =~ /^http(s)?:.*/
+  download = "/tmp/#{bundle_name}_vim_bundle"
+  `wget -q -O #{download} #{vim_resource}`
+  vim_resource = download
+end
+
+# determine type and handle appropriately
+resource_type = `file -ib #{vim_resource}`
+case resource_type
+when /application.zip/
+  # unzip file into bundle dir
+  `unzip #{vim_resource} -d #{BUNDLE_DIR}`
+when /text.plain/
+  FileUtils.mkdir_p( "#{BUNDLE_DIR}" )
+  # determine if .vim or .vba
+  # if it is a vba script, launch vim, and extract vimball into bundle dir
+  # if it is a vim script, just move to appropriate directory
+  `head #{vim_resource} | grep UseVimball`
+  if $?.success?
+    `cd #{BUNDLE_DIR} && ex #{vim_resource} -c ':UseVimball #{BUNDLE_DIR}' -c ':q'`
+  else
+    FileUtils.mkdir_p( "#{BUNDLE_DIR}/#{install_path}" )
+    FileUtils.mv( vim_resource, "#{BUNDLE_DIR}/#{install_path}/#{bundle_name}.vim" )
+  end
+else
+  puts "unknown vim resource type: #{resource_type}"
+end
+

@@ -1,0 +1,24 @@
+#!/bin/bash
+
+# "disable" bundle by removing link to bundles-available
+VIM_DIR=$HOME/.vim/
+
+BUNDLE=$1
+if [ -z $BUNDLE ] ; then
+  echo "must specify bundle to disable"
+  exit 1
+fi
+
+if [ ! -d ${VIM_DIR}/bundles-available/$BUNDLE ] ; then
+  echo "unknown bundle: $BUNDLE"
+  exit 1
+fi
+
+if [ ! -h ${VIM_DIR}/bundle/$BUNDLE ] ; then
+  echo "$BUNDLE already disable"
+  exit 0
+fi
+
+rm ${VIM_DIR}/bundle/$BUNDLE
+echo "$BUNDLE disabled"
+
